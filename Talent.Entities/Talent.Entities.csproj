@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20210601213217_pushNotification2.cs" />
+    <Compile Remove="Migrations\20210601213217_pushNotification2.Designer.cs" />
+    <Compile Remove="Migrations\20210610084510_update-fields.cs" />
+    <Compile Remove="Migrations\20210610084510_update-fields.Designer.cs" />
+    <Compile Remove="Migrations\20210610092634_migrate.cs" />
+    <Compile Remove="Migrations\20210610092634_migrate.Designer.cs" />
+    <Compile Remove="Migrations\20210610094637_update-italent.cs" />
+    <Compile Remove="Migrations\20210610094637_update-italent.Designer.cs" />
+    <Compile Remove="Migrations\20210610095127_update-italent.cs" />
+    <Compile Remove="Migrations\20210610095127_update-italent.Designer.cs" />
+    <Compile Remove="Migrations\20210610112923_update.cs" />
+    <Compile Remove="Migrations\20210610112923_update.Designer.cs" />
+    <Compile Remove="Migrations\20210708110400_adjustment-new-db.cs" />
+    <Compile Remove="Migrations\20210708110400_adjustment-new-db.Designer.cs" />
+    <Compile Remove="Migrations\20210709084729_set-table.cs" />
+    <Compile Remove="Migrations\20210709084729_set-table.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\4 ALTER TABLE%28Up 10 Juli 2020%29\" />
+    <Folder Include="Migrations\NewFolder\" />
+  </ItemGroup>
+
+</Project>

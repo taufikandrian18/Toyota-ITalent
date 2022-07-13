@@ -1,0 +1,6 @@
+﻿@page "{mode}"
+@model Talent.WebAdmin.Pages.Setup.Tasks.RatingModel
+@{
+    ViewData["Title"] = "iTalent - Task (Rating)";
+}
+<rating mode="@Model.Mode" :task-id="@Model.TaskId" :from-outside="@Model.FromOutside.ToString().ToLower()"></rating>

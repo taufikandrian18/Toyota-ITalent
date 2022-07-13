@@ -1,0 +1,79 @@
+﻿@page
+@model Talent.WebAdmin.Pages.Auth.LoginModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>iTalent - Login</title>
+
+    <link rel="icon" href="~/icon_italent.png">
+    <link rel="stylesheet" href="~/css/ipack.css" asp-append-version="true" />
+</head>
+
+<body class="container-fluid login-container">
+    <div class="position-middle login-box card talent_roundborder row" id="app">
+        <div class="login-showcase col-sm-12 col-md-7">
+            <div class="position-middle showcase">
+                <p class="title">Welcome to <b>iTalent</b></p>
+                <p class="description">(Indonesia – Toyota Learning & Development) System</p>
+                <p class="title">Experience the Fun Learning</p>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-5 d-flex flex-wrap align-items-center">
+            <div class="login-form py-md-4 px-md-5 p-sm-2">
+                <img class="img-toyota" src="~/images/logo_toyota.png" alt="">
+                <img class="img-pc mt-4" src="~/images/ilu_pc.png" alt="">
+                <div class="mt-4">
+                    @if (string.IsNullOrEmpty(Model.Error) == false)
+                    {
+                        <div class="field-validation-error">
+                            @Model.Error
+                        </div>
+                    }
+                    <p>@Model.TAMSignOnToken</p>
+                    <form method="post" id="sso-login-form" class="text-center" style="display: none;">
+                        <tam-sso id="btn-sso-hide" app="@Model.AppId" server="@Model.SsoUri"
+                            auto-submit="sso-login-form" class="d-flex">
+                        </tam-sso>
+                    </form>
+
+                    <button id="btn-login" class="btn-login">
+                        Login using TAM Passport
+                    </button>
+                </div>
+            </div>
+            <div class="w-100 d-flex justify-content-end">
+                <div>Best Viewed with :
+                    <img class="w-auto mr-2" src="~/images/logo_chrome.png" alt="">
+                    <img src="~/images/logo_mozilla.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="@Model.SsoUri/tam-sso.js"></script>
+    <script>
+        // self executing function here
+        (function () {
+            // your page initialization code here
+            // the DOM will be available here
+
+            var temp = document.getElementById("btn-login");
+            console.log('asd', temp)
+            temp.addEventListener("click", function (event) {
+                event.preventDefault();
+                document.getElementById("tam-sso-button").click();
+                console.log(document.getElementById("btn-sso-hide"))
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,3 @@
+ALTER TABLE Positions
+	ADD PositionCode VARCHAR(250) NOT NULL
+		CONSTRAINT DF_Positions_PositionCode DEFAULT 'SYSTEM'

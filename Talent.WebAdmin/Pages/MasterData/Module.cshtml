@@ -1,0 +1,7 @@
+﻿@page
+@model Talent.WebAdmin.Pages.MasterData.ModuleModel
+@{
+    ViewData["Title"] = "iTalent - Module";
+}
+
+<module :module-id="@Model.ModuleId" :from-outside="@Model.FromOutside.ToString().ToLower()"></module>

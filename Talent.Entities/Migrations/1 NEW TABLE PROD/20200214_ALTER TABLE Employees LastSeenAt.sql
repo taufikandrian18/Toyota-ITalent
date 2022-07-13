@@ -1,0 +1,5 @@
+ALTER TABLE Employees
+ALTER COLUMN LastSeenAt DATETIME2 NULL
+
+UPDATE Employees
+SET LastSeenAt = NULL

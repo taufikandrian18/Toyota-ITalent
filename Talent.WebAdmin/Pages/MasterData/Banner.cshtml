@@ -1,0 +1,7 @@
+﻿@page
+@model Talent.WebAdmin.Pages.MasterData.BannerModel
+@{
+    ViewData["Title"] = "iTalent - Banner";
+}
+
+<banner :banner-id="@Model.BannerId" :from-outside="@Model.FromOutside.ToString().ToLower()"></banner>

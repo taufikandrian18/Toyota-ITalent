@@ -1,0 +1,2 @@
+ALTER TABLE StagingOutlet
+ADD RegionCode DECIMAL(38, 0) NOT NULL

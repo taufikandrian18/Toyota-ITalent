@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Talent.Entities.Entities
+{
+    public partial class ApprovalToTasks
+    {
+        [Key]
+        public int ApprovalId { get; set; }
+        public int TaskId { get; set; }
+
+        [ForeignKey("ApprovalId")]
+        [InverseProperty("ApprovalToTasks")]
+        public virtual Approvals Approval { get; set; }
+        [ForeignKey("TaskId")]
+        [InverseProperty("ApprovalToTasks")]
+        public virtual Tasks Task { get; set; }
+    }
+}

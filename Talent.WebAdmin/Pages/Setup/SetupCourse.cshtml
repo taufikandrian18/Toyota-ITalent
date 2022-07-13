@@ -1,0 +1,7 @@
+﻿@page "{Mode}"
+@model Talent.WebAdmin.Pages.Setup.SetupCourseModel
+@{
+    ViewData["Title"] = "iTalent - Setup Course";
+}
+
+<setup-course mode="@Model.Mode" :id="@Model.SetupCourseId" :from-outside="@Model.FromOutside.ToString().ToLower()"></setup-course>

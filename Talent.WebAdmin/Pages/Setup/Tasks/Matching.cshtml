@@ -1,0 +1,9 @@
+﻿@page "{mode}"
+@model Talent.WebAdmin.Pages.Setup.Tasks.MatchingModel
+@{
+    ViewData["Title"] = "iTalent - Task (Matching)";
+}
+
+@*<matching mode="viewDetail" task-id="100"></matching><matching mode="edit" task-id="100"></matching><matching mode="add"></matching>*@
+
+<matching mode="@Model.Mode" :task-id="@Model.TaskId" :from-outside="@Model.FromOutside.ToString().ToLower()"></matching>

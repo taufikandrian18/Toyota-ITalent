@@ -1,0 +1,8 @@
+﻿@page
+@model Talent.WebAdmin.Pages.Setup.ReleaseTrainingModel
+@{
+    ViewData["Title"] = "iTalent - Release Training";
+}
+
+@*<releasetraining :training-id="@Model.TrainingId" :from-outside="@Model.FromOutside.ToString().ToLower()"></releasetraining>*@
+<releasetrainings :training-id="@Model.TrainingId" :from-outside="@Model.FromOutside.ToString().ToLower()"></releasetrainings>

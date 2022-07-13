@@ -1,0 +1,11 @@
+ALTER TABLE StagingRegion
+DROP COLUMN RegionTypeId
+
+ALTER TABLE StagingRegion
+ADD RegionType VARCHAR(10) NULL
+
+ALTER TABLE Cities
+ADD ParentCode VARCHAR(250) NULL
+
+ALTER TABLE Provinces
+ADD ParentCode VARCHAR(250) NULL

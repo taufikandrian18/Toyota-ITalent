@@ -1,0 +1,2 @@
+﻿ALTER TABLE SurveyMatrixChoices
+ADD Number INT DEFAULT 0 NOT NULL

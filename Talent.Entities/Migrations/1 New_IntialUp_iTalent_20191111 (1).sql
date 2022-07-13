@@ -1,0 +1,2466 @@
+﻿IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'ITALENT_2')
+	CREATE DATABASE ITALENT_2
+GO
+
+USE ITALENT_2
+
+GO
+
+-- Store blob data.
+CREATE TABLE Blobs 
+(
+	BlobId UNIQUEIDENTIFIER 
+		CONSTRAINT PK_Blobs PRIMARY KEY 
+		DEFAULT NEWID(),
+
+	[Name] varchar(64) NOT NULL,
+	MIME VARCHAR(MAX) NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL
+		DEFAULT CURRENT_TIMESTAMP
+)
+
+GO
+
+-- Store list of Toyota Dealers.
+CREATE TABLE Dealers 
+(
+	DealerId VARCHAR(64) 
+		CONSTRAINT PK_Dealers PRIMARY KEY,
+
+	DealerName VARCHAR(128) NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL,
+	CreatedBy VARCHAR(64) NOT NULL
+)
+
+GO
+
+
+CREATE TABLE CFAMs 
+(
+	CFAMId VARCHAR(32) 
+		CONSTRAINT PK_CFAMs PRIMARY KEY,
+	CFAMName VARCHAR(255) NOT NULL
+)
+
+GO
+
+CREATE TABLE Provinces 
+(
+	ProvinceId VARCHAR(32) 
+		CONSTRAINT PK_Provinces PRIMARY KEY,
+	ProvinceName VARCHAR(255) NOT NULL,
+	ParentCode VARCHAR(250) NULL
+)
+
+GO
+
+CREATE TABLE Cities 
+(
+	CityId VARCHAR(32) 
+		CONSTRAINT PK_Cities PRIMARY KEY,
+	CityName VARCHAR(255) NOT NULL,
+	ParentCode VARCHAR(250) NULL
+)
+
+GO
+
+CREATE TABLE Areas
+(
+	AreaId VARCHAR(32)
+		CONSTRAINT PK_Areas PRIMARY KEY,
+	[Name] VARCHAR(128) NOT NULL,
+)
+GO
+
+
+CREATE TABLE Regions 
+(
+    RegionId INT 
+		CONSTRAINT PK_Regions PRIMARY KEY IDENTITY,
+	RegionName VARCHAR(64) NOT NULL,
+)
+
+GO
+
+
+CREATE TABLE Outlets 
+(
+	OutletId VARCHAR(64) 
+		CONSTRAINT PK_Outlets PRIMARY KEY,
+
+	DealerId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_Outlets_Dealers FOREIGN KEY REFERENCES Dealers(DealerId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CFAMId VARCHAR(32) NULL 
+		CONSTRAINT FK_Outlets_CFAMs FOREIGN KEY REFERENCES CFAMs(CFAMId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	AreaId VARCHAR(32) NOT NULL 
+		CONSTRAINT FK_Outlets_Areas FOREIGN KEY REFERENCES Areas(AreaId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	ProvinceId VARCHAR(32) NOT NULL 
+		CONSTRAINT FK_Outlets_Provinces FOREIGN KEY REFERENCES Provinces(ProvinceId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CityId VARCHAR(32) NOT NULL 
+		CONSTRAINT FK_Outlets_Cities FOREIGN KEY REFERENCES Cities(CityId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	RegionId int NULL
+		CONSTRAINT FK_Outlets_Region FOREIGN KEY REFERENCES Regions(RegionId)
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	OutletCode VARCHAR(64) NOT NULL,
+
+	[Name] VARCHAR(MAX) NOT NULL,
+
+	Phone VARCHAR(255) NULL,
+
+	IsBP BIT NOT NULL,
+
+	IsGR BIT NOT NULL,
+
+	IsSales BIT NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL,
+
+	CreatedBy VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE Employees 
+(
+	EmployeeId VARCHAR(64) 
+		CONSTRAINT PK_Employees PRIMARY KEY,
+
+	OutletId VARCHAR(64) 
+		CONSTRAINT FK_Employees_Outlets FOREIGN KEY REFERENCES Outlets(OutletId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	EmployeeUsername VARCHAR(255) NOT NULL,
+
+	EmployeeName VARCHAR(255) NOT NULL,
+
+	EmployeeExperience INT NOT NULL DEFAULT 0,
+
+	LearningPoint INT NOT NULL DEFAULT 0,
+
+	TeachingPoint INT NOT NULL DEFAULT 0,
+
+	EmployeeEmail VARCHAR(255) NULL,
+
+	EmployeePhone VARCHAR(16) NULL,
+	
+	IsCoach BIT NOT NULL DEFAULT 0,
+
+	IsTeamLeader BIT NOT NULL DEFAULT 0,
+
+	LastSeenAt DATETIME2(7) NOT NULL 
+		DEFAULT CURRENT_TIMESTAMP,
+
+	CreatedAt DATETIME2(7) NOT NULL 
+		DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL,
+
+	UpdatedAt DATETIME2(7) NOT NULL 
+		DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL,
+
+	IsDeleted BIT NOT NULL DEFAULT 0,
+
+	BlobId UNIQUEIDENTIFIER NULL
+		CONSTRAINT FK_Employees_Blobs FOREIGN KEY REFERENCES Blobs(BlobId),
+	Nickname VARCHAR(64) NULL,
+	[Description] VARCHAR(1024) NULL,
+	DateOfBirth DATETIME2(7) NULL,
+	Gender VARCHAR(64) NULL,
+	ManpowerStatusType VARCHAR(32) NULL
+)
+
+
+GO
+
+
+CREATE TABLE DealerPeopleCategories (
+	DealerPeopleCategoryId INT NOT NULL
+		CONSTRAINT PK_Dealer_People_Category PRIMARY KEY,
+	[Name] VARCHAR(64) NOT NULL
+)
+GO
+
+CREATE TABLE Positions 
+(
+    PositionId INT NOT NULL
+		CONSTRAINT PK_Positions PRIMARY KEY IDENTITY,
+	DealerPeopleCategoryId INT NULL
+		CONSTRAINT FK_Positions_DealerPeopleCategory 
+		FOREIGN KEY REFERENCES DealerPeopleCategories(DealerPeopleCategoryId),
+	PositionName VARCHAR(64) NOT NULL,
+	PositionDescription VARCHAR(1024) NOT NULL,
+	IsTamPeople BIT NOT NULL DEFAULT 0
+)
+GO
+
+CREATE TABLE EmployeePositionMappings 
+(
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeePositionMappings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+    PositionId INT NOT NULL 
+		CONSTRAINT FK_EmployeePositionMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT PK_EmployeePositionMappings PRIMARY KEY(EmployeeId, PositionId)
+)
+
+GO
+
+​
+-- SPRINT I
+-- Key Action
+CREATE TABLE KeyActions 
+(
+	KeyActionId INT 
+		CONSTRAINT PK_KeyActions PRIMARY KEY IDENTITY,
+
+	KeyActionCode VARCHAR(16) NOT NULL 
+		CONSTRAINT UQ_KeyActions_KeyActionCode UNIQUE,
+
+	KeyActionName VARCHAR(255) NOT NULL,
+	KeyActionDescription VARCHAR(1024) NULL,
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_KeyActions_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_KeyActions_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_KeyActions_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_KeyActions_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+GO
+
+-- Competency
+CREATE TABLE CompetencyTypes 
+(
+	CompetencyTypeId INT 
+		CONSTRAINT PK_CompetencyTypes PRIMARY KEY IDENTITY,
+	CompetencyTypeName VARCHAR(32) NOT NULL
+)
+
+GO
+
+CREATE TABLE Competencies 
+(
+	CompetencyId INT 
+		CONSTRAINT PK_Competencies PRIMARY KEY IDENTITY,
+
+	CompetencyTypeId INT NOT NULL 
+		CONSTRAINT FK_Competencies_CompetencyTypes FOREIGN KEY REFERENCES CompetencyTypes(CompetencyTypeId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	PrefixCode VARCHAR(16) NOT NULL,
+	CompetencyName VARCHAR(255) NOT NULL,
+	CompetencyDescription VARCHAR(1024) NULL,
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Competencies_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Competencies_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Competencies_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Competencies_UpdatedBy DEFAULT 'SYSTEM',
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+
+CREATE TABLE CompetencyKeyActionMappings 
+(
+    CompetencyId INT NOT NULL 
+		CONSTRAINT FK_CompetencyKeyActionMappings_Competencies FOREIGN KEY REFERENCES Competencies(CompetencyId),
+    KeyActionId INT NOT NULL 
+		CONSTRAINT FK_CompetencyKeyActionMappings_KeyActions FOREIGN KEY REFERENCES KeyActions(KeyActionId),
+
+	CONSTRAINT PK_CompetencyKeyActionMappings PRIMARY KEY(CompetencyId, KeyActionId)
+)
+
+GO
+
+-- Topic
+CREATE TABLE EBadges 
+(
+	EBadgeId INT 
+		CONSTRAINT PK_EBadges PRIMARY KEY IDENTITY,
+	EBadgeName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE Topics 
+(
+	TopicId INT 
+		CONSTRAINT PK_Topics PRIMARY KEY IDENTITY,
+
+	EBadgeId INT 
+		CONSTRAINT FK_Topics_EBadges FOREIGN KEY REFERENCES EBadges(EBadgeId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	BlobId UNIQUEIDENTIFIER 
+		CONSTRAINT FK_Topics_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	TopicName VARCHAR(255) NOT NULL,
+	TopicMinimumPoints INT NOT NULL,
+	TopicDescription VARCHAR(1024) NULL,
+	CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Topics_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Topics_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Topics_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Topics_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+GO
+
+CREATE TABLE EvaluationTypes 
+(
+	EvaluationTypeId INT 
+		CONSTRAINT PK_EvaluationTypes PRIMARY KEY IDENTITY,
+	EvaluationTypeName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE CompetencyEvaluationMappings 
+(
+	CompetencyId INT NOT NULL 
+		CONSTRAINT FK_CompetencyEvaluationMappings_Competencies FOREIGN KEY REFERENCES Competencies(CompetencyId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	EvaluationTypeId INT NOT NULL 
+		CONSTRAINT FK_CompetencyEvaluationMappings_EvaluationTypes FOREIGN KEY REFERENCES EvaluationTypes(EvaluationTypeId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	BonusScoreLT50 INT NOT NULL,
+	BonusScoreMTE50 INT NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_CompetencyEvaluationMappings_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_CompetencyEvaluationMappings_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_CompetencyEvaluationMappings_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_CompetencyEvaluationMappings_UpdatedBy DEFAULT 'SYSTEM',
+
+	CONSTRAINT PK_CompetencyEvaluationMappings PRIMARY KEY(CompetencyId, EvaluationTypeId)
+)
+
+GO
+
+-- Coach
+CREATE TABLE Coaches
+(
+	CoachId INT NOT NULL 
+		CONSTRAINT PK_Coaches PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_Coaches_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	CoachIsActive BIT NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Coaches_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Coaches_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Coaches_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Coaches_UpdatedBy DEFAULT 'SYSTEM',
+)
+GO
+
+CREATE TABLE CoachTopicMappings
+(
+	CoachId INT NOT NULL 
+		CONSTRAINT FK_CoachTopicMappings_Coaches FOREIGN KEY REFERENCES Coaches(CoachId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	TopicId INT NOT NULL 
+		CONSTRAINT FK_CoachTopicMappings_Topics FOREIGN KEY REFERENCES Topics(TopicId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CONSTRAINT PK_CoachTopicMappings PRIMARY KEY(CoachId, TopicId)
+)
+
+GO
+
+CREATE TABLE CoachSchedules 
+(
+	CoachScheduleId INT NOT NULL 
+		CONSTRAINT PK_CoachSchedules PRIMARY KEY IDENTITY,
+
+	CoachId INT NOT NULL 
+		CONSTRAINT FK_CoachSchedules_Coaches FOREIGN KEY (CoachId) REFERENCES Coaches(CoachId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	ScheduleName VARCHAR(64) DEFAULT 'Schedule Name',
+	StartDateTime DATETIME2 (7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	EndDateTime DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+)
+
+GO
+
+-- Digital Signature​
+CREATE TABLE DigitalSignatures 
+(
+	DigitalSignatureId INT 
+		CONSTRAINT PK_DigitalSignatures PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_DigitalSignatures_Employees FOREIGN KEY REFERENCES Employees(EmployeeId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	BlobId UNIQUEIDENTIFIER 
+		CONSTRAINT FK_DigitalSignatures_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_DigitalSignatures_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_DigitalSignatures_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_DigitalSignatures_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL
+        CONSTRAINT DF_DigitalSignatures_UpdatedBy DEFAULT 'SYSTEM',
+	IsDeleted BIT NOT NULL
+)
+
+GO
+
+-- Course
+CREATE TABLE ProgramTypes
+(
+	ProgramTypeId INT 
+		CONSTRAINT PK_ProgramTypes PRIMARY KEY IDENTITY,
+	ProgramTypeName VARCHAR(128) NOT NULL
+)
+
+GO
+
+CREATE TABLE Levels
+(
+	LevelId INT 
+		CONSTRAINT PK_Levels PRIMARY KEY IDENTITY,
+	LevelName VARCHAR(128) NOT NULL
+)
+
+GO
+
+CREATE TABLE LearningTypes
+(
+	LearningTypeId INT 
+		CONSTRAINT PK_LearningTypes PRIMARY KEY IDENTITY,
+
+	LearningName VARCHAR(32) NOT NULL
+)
+
+GO
+
+CREATE TABLE CourseCategories
+(
+	CourseCategoryId INT 
+		CONSTRAINT PK_CourseCategories PRIMARY KEY IDENTITY,
+	CourseCategoryName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE ApprovalStatus
+(
+	ApprovalStatusId INT 
+		CONSTRAINT PK_ApprovalStatus PRIMARY KEY IDENTITY,
+	ApprovalName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE Courses
+(
+	CourseId INT 
+		CONSTRAINT PK_Courses PRIMARY KEY IDENTITY,
+
+	ProgramTypeId INT NOT NULL 
+		CONSTRAINT FK_Courses_ProgramTypes FOREIGN KEY REFERENCES ProgramTypes(ProgramTypeId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	LevelId INT NOT NULL 
+		CONSTRAINT FK_Courses_Levels FOREIGN KEY REFERENCES Levels(LevelId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CourseCategoryId INT NOT NULL 
+		CONSTRAINT FK_Courses_CourseCategories FOREIGN KEY REFERENCES CourseCategories(CourseCategoryId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	LearningTypeId INT NOT NULL 
+		CONSTRAINT FK_Courses_LearningTypes FOREIGN KEY REFERENCES LearningTypes(LearningTypeId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	BlobId UNIQUEIDENTIFIER NOT NULL 
+		CONSTRAINT FK_Courses_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CourseName VARCHAR(255) NOT NULL,
+	CoursePrice INT NULL,
+	CourseDescription VARCHAR(1024) NULL,
+	Others VARCHAR(255) NULL,
+	IsRecommendedForYou BIT NULL,
+	IsPopular BIT NULL,
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Courses_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Courses_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Courses_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Courses_UpdatedBy DEFAULT 'SYSTEM',
+	IsDeleted BIT NULL DEFAULT 0,
+	CourseApprovedAt DATETIME2(7) NULL,
+	SetupCourseApprovedAt DATETIME2(7) NULL,
+	SetupCourseCreatedAt DATETIME2(7) NULL
+		CONSTRAINT DF_Courses_SetupCourseCreatedAt DEFAULT CURRENT_TIMESTAMP,
+	SetupCourseCreatedBy VARCHAR(64) NULL
+		CONSTRAINT DF_Courses_SetupCourseCreatedBy DEFAULT 'SYSTEM',
+	SetupCourseUpdatedAt DATETIME2(7) NULL 
+		CONSTRAINT DF_Courses_SetupCourseUpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	SetupCourseUpdatedBy VARCHAR(64) NULL
+        CONSTRAINT DF_Courses_SetupCourseUpdatedBy DEFAULT 'SYSTEM'
+)
+
+GO
+
+CREATE TABLE [CourseLearningObjectives](
+	LearningObjectiveId INT 
+			CONSTRAINT PK_LearningObjectives PRIMARY KEY IDENTITY,
+	CourseId INT NOT NULL 
+		CONSTRAINT FK_CourseLearningObjectives_Courses FOREIGN KEY REFERENCES Courses(CourseId) ,
+	LearningObjectiveName varchar(1024) NOT NULL
+)
+GO
+
+CREATE TABLE TrainingTypes
+(
+	TrainingTypeId INT 
+		CONSTRAINT PK_TrainingTypes PRIMARY KEY IDENTITY,
+	TrainingTypeName VARCHAR(64) NOT NULL,
+)
+
+GO
+
+CREATE TABLE [CourseTrainingTypeMappings](
+	CourseId INT 
+		CONSTRAINT FK_CourseTrainingTypeMappings_Courses FOREIGN KEY REFERENCES Courses(CourseId) NOT NULL,
+	TrainingTypeId INT 
+		CONSTRAINT FK_CourseTrainingTypeMappings_TrainingTypes FOREIGN KEY REFERENCES TrainingTypes(TrainingTypeId) NOT NULL,
+	MinimumScore INT NOT NULL,
+	WorkloadRequirement VARCHAR(1024) NOT NULL,
+	Percentage INT NOT NULL,
+	CONSTRAINT PK_CourseTrainingTypeMappings PRIMARY KEY(CourseId, TrainingTypeId)
+) 
+GO
+
+-- Module
+CREATE TABLE MaterialTypes
+(
+	MaterialTypeId INT 
+		CONSTRAINT PK_MaterialTypes PRIMARY KEY IDENTITY,
+	MaterialTypeName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE Modules
+(
+	ModuleId INT 
+		CONSTRAINT PK_Modules PRIMARY KEY IDENTITY,
+
+	BlobId UNIQUEIDENTIFIER NOT NULL 
+		CONSTRAINT FK_Modules_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	MaterialTypeId INT NOT NULL
+		CONSTRAINT FK_Modules_MaterialTypes FOREIGN KEY REFERENCES MaterialTypes(MaterialTypeId),
+
+	MaterialBlobId UNIQUEIDENTIFIER NULL
+		CONSTRAINT FK_Modules_MaterialBlobs FOREIGN KEY REFERENCES Blobs(BlobId),
+
+	ModuleName VARCHAR(255) NOT NULL,
+	ModuleDescription VARCHAR(1024) NOT NULL,
+	MaterialLink VARCHAR(1024),
+	MaterialDownloadable BIT NOT NULL DEFAULT 0,
+	CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Modules_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Modules_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Modules_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Modules_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+
+CREATE TABLE ModuleTopicMappings (
+	ModuleId INT NOT NULL
+		CONSTRAINT FK_ModuleTopicMappings_Modules FOREIGN KEY REFERENCES Modules(ModuleId),
+	TopicId INT NOT NULL
+		CONSTRAINT FK_ModuleTopicMappings_Topics FOREIGN KEY REFERENCES Topics(TopicId),
+
+	CONSTRAINT PK_ModuleTopicMappings PRIMARY KEY(ModuleId, TopicId)
+)
+GO
+
+
+-- Time Point
+CREATE TABLE PointTypes 
+(
+	PointTypeId INT 
+		CONSTRAINT PK_PointTypes PRIMARY KEY IDENTITY,
+
+	PointTypeName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE TimePoints 
+(
+	TimePointId INT 
+		CONSTRAINT PK_TimePoints PRIMARY KEY IDENTITY,
+
+	PointTypeId INT NOT NULL 
+		CONSTRAINT FK_TimePoints_PointTypes FOREIGN KEY REFERENCES PointTypes(PointTypeId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	[Time] INT NULL,
+	Score INT NULL,
+	Points INT NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_TimePoints_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_TimePoints_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_TimePoints_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_TimePoints_UpdatedBy DEFAULT 'SYSTEM',
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+-- Task
+CREATE TABLE QuestionTypes
+(
+    QuestionTypeId INT
+		CONSTRAINT PK_QuestionTypes PRIMARY KEY IDENTITY,
+    QuestionTypeName VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE Tasks
+(
+    TaskId INT
+		CONSTRAINT PK_Tasks PRIMARY KEY IDENTITY,
+
+    CompetencyId INT NOT NULL 
+		CONSTRAINT FK_Tasks_Competencies FOREIGN KEY REFERENCES Competencies(CompetencyId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+    QuestionTypeId INT NOT NULL 
+		CONSTRAINT FK_Tasks_QuestionTypes FOREIGN KEY REFERENCES QuestionTypes(QuestionTypeId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+    ModuleId INT NOT NULL 
+		CONSTRAINT FK_Tasks_Modules FOREIGN KEY REFERENCES Modules(ModuleId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	BlobId UNIQUEIDENTIFIER NULL 
+		CONSTRAINT FK_Tasks_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	EvaluationTypeId INT NOT NULL 
+		CONSTRAINT FK_Tasks_EvaluationTypes FOREIGN KEY REFERENCES EvaluationTypes(EvaluationTypeId),
+
+    TaskNumber INT NOT NULL,
+	LayoutType INT NOT NULL,
+	StoryLineDescription VARCHAR(1024) NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+
+    CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Tasks_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+    CreatedBy VARCHAR(255) NOT NULL
+		CONSTRAINT DF_Tasks_CreatedBy DEFAULT 'SYSTEM',
+    UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Tasks_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Tasks_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL
+)
+
+GO
+
+CREATE TABLE TaskTrueFalseTypes
+(
+    TaskId INT
+		CONSTRAINT PK_TaskTrueFalseTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskTrueFalseTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+    Question VARCHAR(1024) NOT NULL,
+    Answer BIT NOT NULL,
+    Score INT NOT NULL,
+)
+
+GO
+
+CREATE TABLE TaskMatchingChoices
+(
+    TaskMatchingChoiceId INT
+		CONSTRAINT PK_TaskMatchingChoices PRIMARY KEY IDENTITY,
+
+    TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskMatchingChoices_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+    BlobId UNIQUEIDENTIFIER NULL 
+		CONSTRAINT FK_TaskMatchingChoices_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	TaskMatchingChoiceCode CHAR(3) NOT NULL,
+    [Text] VARCHAR(64) NULL
+)
+
+GO 
+
+CREATE TABLE TaskMatchingTypes
+(
+    TaskId INT
+		CONSTRAINT PK_TaskMatchingTypes PRIMARY KEY
+		CONSTRAINT FK_TaskMatchingTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskID) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+    Question VARCHAR(1024) NOT NULL,
+    Answer VARCHAR(256) NOT NULL,
+    Score INT NOT NULL,
+)
+
+GO
+
+CREATE TABLE TaskSequenceChoices
+(
+    TaskSequenceChoiceId INT
+		CONSTRAINT PK_TaskSequenceChoices PRIMARY KEY IDENTITY,
+    TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskSequenceChoices_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+    Number INT NOT NULL,
+    [Text] VARCHAR(64) NOT NULL,
+    Score int NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskSequenceTypes
+(
+    TaskId INT
+		CONSTRAINT PK_TaskSequenceTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskSequenceTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+    Question VARCHAR(1024) NOT NULL,
+    Answer VARCHAR(256) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskTebakGambarPictures 
+(
+	TaskTebakGambarId INT 
+		CONSTRAINT PK_TaskTebakGambarPictures PRIMARY KEY IDENTITY,
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskTebakGambarPictures_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	BlobId UNIQUEIDENTIFIER NOT NULL 
+		CONSTRAINT FK_TaskTebakGambarPictures_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+	Number INT NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskTebakGambarTypes 
+(
+	TaskId INT
+		CONSTRAINT PK_TaskTebakGambarTypes PRIMARY KEY
+		CONSTRAINT FK_TaskTebakGambarTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	Question VARCHAR(1024) NOT NULL,
+	Answer INT NOT NULL,
+	Score INT NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskHotSpotAnswers 
+(
+	TaskHotSpotAnswerId INT
+		CONSTRAINT PK_TaskHotSpotAnswers PRIMARY KEY IDENTITY,
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskHotSpotAnswers_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	[Number] [int] NOT NULL,
+	Answer VARCHAR(64) NOT NULL,
+	Score INT NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskHotSpotTypes 
+(
+	TaskId INT
+		CONSTRAINT PK_TaskHotSpotTypes PRIMARY KEY
+		CONSTRAINT FK_TaskHotSpotTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	BlobId UNIQUEIDENTIFIER NOT NULL 
+		CONSTRAINT FK_TaskHotSpotTypes_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	Question VARCHAR(1024) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskShortAnswerTypes
+(
+	TaskId INT 
+		CONSTRAINT PK_TaskShortAnswerTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskShortAnswerTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	Question VARCHAR(512) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskEssayTypes
+(
+	TaskId INT
+		CONSTRAINT PK_TaskEssayTypes PRIMARY KEY
+		CONSTRAINT FK_TaskEssayTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	Question VARCHAR(1024) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskChecklistChoices
+(
+	TaskChecklistChoiceId INT
+		CONSTRAINT PK_TaskChecklistChoices PRIMARY KEY IDENTITY,
+
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskChecklistChoices_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	Number INT NOT NULL,
+	[Text] VARCHAR(64) NOT NULL,
+	IsAnswer BIT NOT NULL,
+	Score INT NOT NULL,
+)
+
+GO
+
+CREATE TABLE TaskChecklistTypes
+(
+	TaskId INT 
+		CONSTRAINT PK_TaskChecklistTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskChecklistTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	Question VARCHAR(1024) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskRatingChoices
+(
+	TaskRatingChoiceId INT 
+		CONSTRAINT PK_TaskRatingChoices PRIMARY KEY IDENTITY,
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskRatingChoices_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	Number INT NOT NULL,
+	[Text] VARCHAR(64) NOT NULL,
+)
+
+GO
+
+CREATE TABLE TaskRatingTypes
+(
+	TaskId INT 
+		CONSTRAINT PK_TaskRatingTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskRatingTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	Question VARCHAR(1024) NOT NULL,
+	Score0To20 INT NOT NULL,
+	Score21To40 INT NOT NULL,
+	Score41To60 INT NOT NULL,
+	Score61To80 INT NOT NULL,
+	Score81To100 INT NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskMultipleChoiceChoices
+(
+	TaskMultipleChoiceChoiceId INT 
+		CONSTRAINT PK_TaskMultipleChoiceChoices PRIMARY KEY IDENTITY,
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskMultipleChoiceChoices_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	Number INT NOT NULL,
+	[Text] VARCHAR(64) NOT NULL,
+)
+
+GO
+
+CREATE TABLE TaskMultipleChoiceTypes
+(
+	TaskId INT 
+		CONSTRAINT PK_TaskMultipleChoiceTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskMultipleChoiceTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	AnswerId INT NOT NULL,
+	Question VARCHAR(1024) NOT NULL,
+	Score int NOT NULL,
+)
+
+GO
+
+CREATE TABLE TaskFileUploadTypes 
+(
+	TaskId INT 
+		CONSTRAINT PK_TaskFileUploadTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskFileUploadTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+	Question VARCHAR(1024) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskMatrixTypes 
+(
+	TaskId INT 
+		CONSTRAINT PK_TaskMatrixTypes PRIMARY KEY 
+		CONSTRAINT FK_TaskMatrixTypes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON DELETE CASCADE ON UPDATE CASCADE,
+
+	Question VARCHAR(1024) NOT NULL,
+	ScoreColumn1 INT NOT NULL,
+	ScoreColumn2 INT NOT NULL,
+	ScoreColumn3 INT NOT NULL,
+	ScoreColumn4 INT NOT NULL,
+	ScoreColumn5 INT NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskMatrixChoices 
+(
+	TaskMatrixChoiceId INT 
+		CONSTRAINT PK_TaskMatrixChoices PRIMARY KEY IDENTITY,
+	TaskId INT 
+		CONSTRAINT FK_TaskMatrixChoices_Tasks FOREIGN KEY REFERENCES Tasks(TaskId),
+	[Text] VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE TaskMatrixQuestions 
+(
+	TaskMatrixQuestionId INT 
+		CONSTRAINT PK_TaskMatrixQuestions PRIMARY KEY IDENTITY,
+	TaskId INT 
+		CONSTRAINT FK_TaskMatrixQuestions_Tasks FOREIGN KEY REFERENCES Tasks(TaskId),
+	Number INT,
+	Question VARCHAR(64) NOT NULL
+)
+
+GO
+
+
+
+CREATE TABLE SetupModules 
+(
+	SetupModuleId INT 
+		CONSTRAINT PK_SetupModules PRIMARY KEY IDENTITY,
+
+	CourseId INT NULL 
+		CONSTRAINT FK_SetupModules_Courses FOREIGN KEY REFERENCES Courses(CourseId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	ModuleId INT NOT NULL 
+		CONSTRAINT FK_SetupModules_Modules FOREIGN KEY REFERENCES Modules(ModuleId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+	TrainingTypeId INT NULL 
+		CONSTRAINT FK_SetupModules_TrainingTypes FOREIGN KEY REFERENCES TrainingTypes(TrainingTypeId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	TimePointId INT NOT NULL 
+		CONSTRAINT FK_SetupModules_TimePoints FOREIGN KEY REFERENCES TimePoints(TimePointId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+    IsRecommendedForYou BIT NOT NULL,
+    IsPopular BIT NOT NULL,
+    MinimumScore INT NULL,
+    IsForRemedial BIT NULL,
+	IsPublished BIT NOT NULL DEFAULT 0,
+	IsDeleted BIT NOT NULL DEFAULT 0,
+	ApprovedAt DATETIME2(7) NULL,
+	CreatedAt datetime2 NOT NULL
+		CONSTRAINT DF_SetupModules_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_SetupModules_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2 NOT NULL
+		CONSTRAINT DF_SetupModules_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_SetupModules_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+GO
+
+CREATE TABLE [CoursePrerequisiteMappings](
+	CoursePrerequisiteMappingId INT NOT NULL
+		CONSTRAINT PK_CoursePrerequisiteMappings PRIMARY KEY IDENTITY,
+	PrevCourseId INT 
+		CONSTRAINT FK_CoursePrerequisiteMappings_PrevCourses FOREIGN KEY REFERENCES Courses(CourseId) NOT NULL,
+	NextCourseId INT 
+		CONSTRAINT FK_CoursePrerequisiteMappings_NextCourses FOREIGN KEY REFERENCES Courses(CourseId) NULL,
+	NextSetupModuleId INT 
+		CONSTRAINT FK_CoursePrerequisiteMappings_NextSetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId) NULL,
+) 
+GO
+
+CREATE TABLE PopQuizzes 
+(
+	PopQuizId INT 
+		CONSTRAINT PK_PopQuizzes PRIMARY KEY IDENTITY,
+    PopQuizName VARCHAR(64) NOT NULL,
+    CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_PopQuizzes_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_PopQuizzes_CreatedBy DEFAULT 'SYSTEM',
+    UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_PopQuizzes_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_PopQuizzes_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+CREATE TABLE SetupTasks 
+(
+	SetupTaskId INT 
+		CONSTRAINT PK_SetupTasks PRIMARY KEY IDENTITY,
+
+    SetupModuleId INT NULL 
+		CONSTRAINT FK_SetupTasks_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+    PopQuizId INT NULL 
+		CONSTRAINT FK_SetupTasks_PopQuizzes FOREIGN KEY REFERENCES PopQuizzes(PopQuizId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+    CompetencyId INT NULL 
+		CONSTRAINT FK_SetupTasks_Competencies FOREIGN KEY REFERENCES Competencies(CompetencyId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+    ModuleId INT NULL 
+		CONSTRAINT FK_SetupTasks_Modules FOREIGN KEY REFERENCES Modules(ModuleId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+    TestTime INT NOT NULL,
+    IsGrouping BIT NOT NULL,
+    TotalParticipant INT NULL,
+    TotalQuestion INT NULL,
+    QuestionPerParticipant INT NULL,
+	ApprovedAt DATETIME2(7) NULL
+)
+
+GO
+
+CREATE TABLE SetupTaskCodes 
+(
+	SetupTaskId INT NOT NULL 
+		CONSTRAINT FK_SetupTaskCodes_SetupTasks FOREIGN KEY REFERENCES SetupTasks(SetupTaskId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_SetupTaskCodes_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+    QuestionNumber INT NOT NULL,
+	CONSTRAINT PK_SetupTaskCodes PRIMARY KEY(SetupTaskId, TaskId)
+)
+
+GO
+
+-- Setup Learning & Release Training
+CREATE TABLE TrainingServiceLevels 
+(
+	TrainingServiceLevelId INT 
+		CONSTRAINT PK_TrainingServiceLevels PRIMARY KEY IDENTITY,
+
+    [Name] VARCHAR(64) NOT NULL,
+    BasicLevel INT NOT NULL DEFAULT 0,
+    FundamentalLevel INT NOT NULL DEFAULT 0,
+    AdvanceLevel INT NOT NULL DEFAULT 0,
+	CreatedAt datetime2 NOT NULL
+		CONSTRAINT DF_TrainingServiceLevels_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_TrainingServiceLevels_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2 NOT NULL
+		CONSTRAINT DF_TrainingServiceLevels_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_TrainingServiceLevels_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+GO
+
+CREATE TABLE Trainings 
+(
+    TrainingId INT 
+		CONSTRAINT PK_Trainings PRIMARY KEY IDENTITY,
+    CourseId INT NOT NULL 
+		FOREIGN KEY REFERENCES Courses(CourseId),
+
+    Batch int NOT NULL,
+    StartDate DATE NULL,
+    EndDate DATE NULL,
+    Quota INT NULL,
+    [Location] VARCHAR(255) NULL,
+	IsAccommodate BIT NOT NULL DEFAULT 0,
+
+    IsParticipantTrainee BIT NOT NULL,
+    IsParticipantPermanent BIT NOT NULL,
+
+    CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Trainings_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Trainings_CreatedBy DEFAULT 'SYSTEM',
+    UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Trainings_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(255) NOT NULL
+		CONSTRAINT DF_Trainings_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+	isDeleted BIT NOT NULL DEFAULT 0,
+	Top5Course INT NOT NULL DEFAULT 0
+)
+GO
+
+CREATE TABLE TrainingModuleMappings 
+(
+    TrainingModuleMappingId INT
+		CONSTRAINT PK_TrainingModuleMappings PRIMARY KEY IDENTITY,
+    TrainingId INT NOT NULL 
+		CONSTRAINT FK_TrainingModuleMappings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+	SetupModuleId INT NOT NULL 
+		CONSTRAINT FK_TrainingModuleMappings_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId),
+	TrainingStart DATETIME2(7) NULL,
+    TrainingEnd DATETIME2(7) NULL,
+    TimePointId INT NULL 
+		CONSTRAINT FK_TrainingModuleMappings_TimePoints FOREIGN KEY REFERENCES TimePoints(TimePointId),
+    CoachId INT NULL 
+		CONSTRAINT FK_TrainingModuleMappings_Coaches FOREIGN KEY REFERENCES Coaches(CoachId) 
+)
+
+GO
+
+
+CREATE TABLE TrainingOutletMappings 
+(
+    TrainingId INT NOT NULL 
+		CONSTRAINT FK_TrainingOutletMappings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+    OutletId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_TrainingOutletMappings_Outlets FOREIGN KEY REFERENCES Outlets(OutletId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CONSTRAINT PK_TrainingOutletMappings PRIMARY KEY(TrainingId, OutletId)
+)
+
+GO
+
+CREATE TABLE TrainingPositionMappings 
+(
+    TrainingId INT NOT NULL 
+		CONSTRAINT FK_TrainingPositionMappings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+    PositionId INT NOT NULL 
+		CONSTRAINT FK_TrainingPositionMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CONSTRAINT PK_TrainingPositionMappings PRIMARY KEY(TrainingId, PositionId)
+)
+
+GO
+
+-- My Team
+CREATE TABLE Teams 
+(
+	TeamId INT 
+		CONSTRAINT PK_Teams PRIMARY KEY IDENTITY,
+
+	TeamLeaderId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_Teams_Employees FOREIGN KEY REFERENCES Employees(EmployeeId)
+)
+GO
+
+CREATE TABLE TeamDetails 
+(
+	TeamDetailId INT 
+		CONSTRAINT PK_TeamDetails PRIMARY KEY IDENTITY,
+
+	TeamId INT NOT NULL 
+		CONSTRAINT FK_TeamDetails_Teams FOREIGN KEY REFERENCES Teams(TeamId),
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_TeamDetails_Employees FOREIGN KEY REFERENCES Employees(EmployeeId)
+)
+GO
+
+CREATE TABLE CoachEmployeeMappings 
+(
+	TeamId INT 
+		CONSTRAINT FK_CoachEmployeeMappings_Teams FOREIGN KEY REFERENCES Teams(TeamId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	EmployeeId INT 
+		CONSTRAINT FK_CoachEmployeeMappings_Coaches FOREIGN KEY REFERENCES Coaches(CoachId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT PK_CoachEmployeeMappings PRIMARY KEY(TeamId, EmployeeId)
+)
+
+GO
+
+-- My Events
+CREATE TABLE EventCategories 
+(
+	EventCategoryId INT
+		CONSTRAINT PK_EventCategories PRIMARY KEY IDENTITY,
+
+	[Name] VARCHAR(255) NOT NULL,
+	[Description] VARCHAR(1024) NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_EventCategories_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_EventCategories_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_EventCategories_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_EventCategories_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+GO
+
+CREATE TABLE [Events] 
+(
+	EventId INT 
+		CONSTRAINT PK_Events PRIMARY KEY IDENTITY,
+	EventCategoryId INT NULL 
+		CONSTRAINT FK_Events_EventCategories FOREIGN KEY REFERENCES EventCategories(EventCategoryId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	BlobId UNIQUEIDENTIFIER 
+		CONSTRAINT FK_Events_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	[Name] VARCHAR(255) NOT NULL,
+
+	StartDateTime DATETIME2 (7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	EndDateTime DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	HostName VARCHAR(255) NOT NULL,
+	[Description] VARCHAR(1024) NULL,
+	[Location] VARCHAR(255) NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Events_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Events_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Events_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Events_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+	TotalView INT DEFAULT 0,
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+GO
+
+
+
+-- My Points
+CREATE TABLE RewardTypes 
+(
+	RewardTypeId INT 
+		CONSTRAINT PK_RewardTypes PRIMARY KEY IDENTITY,
+	[Name] VARCHAR(64) NOT NULL
+)
+
+GO
+
+CREATE TABLE Rewards 
+(
+	RewardId INT 
+		CONSTRAINT PK_Rewards PRIMARY KEY IDENTITY,
+
+	RewardTypeId INT NOT NULL 
+		CONSTRAINT FK_Rewards_RewardTypes FOREIGN KEY REFERENCES RewardTypes(RewardTypeId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	ModuleId INT NULL 
+		CONSTRAINT FK_Rewards_Modules FOREIGN KEY REFERENCES Modules(ModuleId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	CoachId INT NULL 
+		CONSTRAINT FK_Rewards_Coaches FOREIGN KEY REFERENCES Coaches(CoachId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+	EventId INT NULL 
+		CONSTRAINT FK_Rewards_Events FOREIGN KEY REFERENCES [Events](EventId) ON 
+			UPDATE NO ACTION ON DELETE NO ACTION,
+
+	[Name] VARCHAR(255) NOT NULL,
+	StartDate DATETIME2(7) NULL, 
+	EndDate DATETIME2(7) NULL,
+	IsActive BIT NOT NULL,
+	[Description] VARCHAR(1024) NULL,
+	TermsAndConditions VARCHAR(1024) NOT NULL,
+	HowToUse VARCHAR(1024) NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Rewards_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Rewards_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Rewards_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Rewards_UpdatedBy DEFAULT 'SYSTEM',
+
+
+	IsDeleted BIT NOT NULL DEFAULT 0,
+)
+GO
+
+CREATE TABLE RewardPointTypes (
+	RewardPointTypeId INT NOT NULL
+		CONSTRAINT PK_RewardPointTypes PRIMARY KEY IDENTITY,
+	[Name] VARCHAR(32) NOT NULL
+)
+GO
+
+CREATE TABLE RewardPoints (
+	RewardPointId INT NOT NULL
+		CONSTRAINT PK_RewardPoints PRIMARY KEY IDENTITY,
+	RewardId INT NOT NULL
+		CONSTRAINT FK_RewardPoints_Rewards FOREIGN KEY REFERENCES Rewards(RewardId),
+	RewardPointTypeId INT NOT NULL
+		CONSTRAINT FK_RewardPoints_RewardPointTypes FOREIGN KEY REFERENCES RewardPointTypes(RewardPointTypeId),
+	Score INT NOT NULL DEFAULT 0
+)
+GO
+
+--Setup Learning 
+CREATE TABLE SetupLearning 
+(
+	SetupLearningId INT 
+		CONSTRAINT PK_SetupLearning PRIMARY KEY IDENTITY,
+
+    SetupModuleId INT NULL 
+		CONSTRAINT FK_SetupLearning_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+    PopQuizId INT NULL 
+		FOREIGN KEY REFERENCES PopQuizzes(PopQuizId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+    CourseId INT NULL 
+		FOREIGN KEY REFERENCES Courses(CourseId) 
+			ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	LearningName VARCHAR(64) NOT NULL,
+	ProgramTypeName VARCHAR(64) NULL,
+	LearningCategoryName VARCHAR(64) NOT NULL,
+	ApprovalStatus VARCHAR(64) NOT NULL,
+    CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ApprovedAt DATETIME2(7) NULL
+)
+
+-- TrainingRatings
+CREATE TABLE TrainingRatings 
+(
+	TrainingRatingId INT 
+		CONSTRAINT PK_TrainingRatings PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_TrainingRatings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	TrainingId INT NOT NULL 
+		CONSTRAINT FK_TrainingRating_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+
+	CourseId INT 
+		CONSTRAINT FK_TrainingRating_Courses FOREIGN KEY REFERENCES Courses(CourseId) NULL,
+	
+	RatingScore INT NOT NULL,
+
+	Review VARCHAR(512),
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL,
+	UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+
+--Guide
+CREATE TABLE GuideTypes(
+	GuideTypeId INT NOT NULL
+		CONSTRAINT PK_GuideTypes PRIMARY KEY IDENTITY,
+	[Name]  VARCHAR(32) NOT NULL
+)
+GO
+
+CREATE TABLE Guides(
+	GuideId int NOT NULL
+		CONSTRAINT PK_Guides PRIMARY KEY IDENTITY,
+	GuideTypeId int NOT NULL
+		CONSTRAINT FK_Guides_GuideTypes FOREIGN KEY REFERENCES GuideTypes(GuideTypeId),
+	BlobId UNIQUEIDENTIFIER NOT NULL
+		CONSTRAINT FK_Guides_Blobs FOREIGN KEY REFERENCES Blobs(BlobId),
+	[Name] varchar(1024) NOT NULL,
+	[Description] varchar(1024) NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_Guides_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(32) NOT NULL
+		CONSTRAINT DF_Guides_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_Guides_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Guides_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL
+)
+GO
+
+-- Mobile Pages (For Banner)
+CREATE TABLE MobilePages(
+	MobilePageId INT NOT NULL
+		CONSTRAINT PK_MobilePages PRIMARY KEY IDENTITY,
+	[Name] varchar(64)  NOT NULL,
+	[Route] varchar(512) NOT NULL,
+	IsForBanner BIT NOT NULL DEFAULT 0
+)
+GO
+
+-- Banners
+CREATE TABLE BannerTypes (
+	BannerTypeId int NOT NULL
+		CONSTRAINT PK_BannerTypes PRIMARY KEY,
+	[Name] varchar(32) NOT NULL
+)
+GO
+
+CREATE TABLE Banners(
+	BannerId int NOT NULL
+		CONSTRAINT PK_Banners PRIMARY KEY IDENTITY,
+	BannerTypeId int NOT NULL
+		CONSTRAINT FK_Banners_BannerTypes FOREIGN KEY REFERENCES BannerTypes(BannerTypeId),
+	BlobId UNIQUEIDENTIFIER NOT NULL
+		CONSTRAINT FK_Banners_Blobs FOREIGN KEY REFERENCES Blobs(BlobId),
+	[Name] varchar(1024) NOT NULL,
+	StartDate datetime2 NULL,
+	EndDate datetime2 NULL,
+	MobilePageId int NULL
+		CONSTRAINT FK_Banners_MobilePages FOREIGN KEY REFERENCES MobilePages(MobilePageId),
+	ContentId int NULL,
+	[Description] varchar(1024) NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_Banners_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(32) NOT NULL
+		CONSTRAINT DF_Banners_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_Banners_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Banners_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+	IsDeleted BIT NOT NULL
+		CONSTRAINT DF_Banners_IsDeleted DEFAULT 0
+)
+GO
+
+--privilege
+
+CREATE TABLE Roles (
+	RoleId INT NOT NULL
+		CONSTRAINT PK_Roles PRIMARY KEY IDENTITY,
+	PositionId INT NOT NULL
+		CONSTRAINT FK_Roles_Positions FOREIGN KEY REFERENCES Positions(PositionId),
+	DealerPeopleCategoryId INT NULL
+		CONSTRAINT FK_Roles_DealerPeopleCategory 
+		FOREIGN KEY REFERENCES DealerPeopleCategories(DealerPeopleCategoryId),
+	[Name] VARCHAR(64) NOT NULL,
+	[Description] VARCHAR(1024) NULL,
+	IsTamPeople BIT NOT NULL DEFAULT 0,
+	CreatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_Roles_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(32) NOT NULL
+		CONSTRAINT DF_Roles_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_Roles_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Roles_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+CREATE TABLE Menus (
+	MenuId VARCHAR(8) NOT NULL
+		CONSTRAINT PK_Menus PRIMARY KEY,
+	[Name] VARCHAR(64) NOT NULL
+)
+
+CREATE TABLE Pages (
+	PageId VARCHAR(8) NOT NULL
+		CONSTRAINT PK_Pages PRIMARY KEY,
+	MenuId VARCHAR(8)
+		CONSTRAINT FK_Pages_Menus 
+		FOREIGN KEY REFERENCES Menus(MenuId),
+	[Name] VARCHAR(64) NOT NULL,
+	NeedApproval bit NOT NULL DEFAULT 0 
+)
+
+CREATE TABLE PrivilegePageMappings (
+	PrivilegePageMappingsId INT NOT NULL
+		CONSTRAINT PK_PrivilegePageMappings PRIMARY KEY IDENTITY,
+	RoleId INT NOT NULL
+		CONSTRAINT FK_PrivilegePageMappings_Roles FOREIGN KEY REFERENCES Roles(RoleId),
+	PageId VARCHAR(8) NOT NULL
+		CONSTRAINT FK_PrivilegePageMappings_Pages FOREIGN KEY REFERENCES Pages(PageId),
+	IsCreate bit NOT NULL DEFAULT 0,
+	IsRead bit NOT NULL DEFAULT 0,
+	IsUpdate bit NOT NULL DEFAULT 0,
+	IsDelete bit NOT NULL DEFAULT 0,
+	CreatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_PrivilegePageMappings_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_PrivilegePageMappings_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_PrivilegePageMappings_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_PrivilegePageMappings_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+--News
+
+CREATE TABLE NewsCategories 
+(
+	NewsCategoryId INT
+		CONSTRAINT PK_NewsCategories PRIMARY KEY IDENTITY,
+
+	[Name] VARCHAR(64) NOT NULL
+)
+
+CREATE TABLE News
+(
+    NewsId INT
+		CONSTRAINT PK_News PRIMARY KEY IDENTITY,
+
+	Title VARCHAR(255) NOT NULL,
+	[Description] VARCHAR(1024),
+
+    NewsCategoryId INT  
+		CONSTRAINT FK_News_NewsCategories  NOT NULL FOREIGN KEY REFERENCES NewsCategories(NewsCategoryId),
+
+	Link VARCHAR(1024),
+	Author VARCHAR(128),
+
+
+	ThumbnailBlobId UNIQUEIDENTIFIER  
+		CONSTRAINT FK_News_ThumbnailBlobs NOT NULL FOREIGN KEY REFERENCES Blobs(BlobId),
+
+	
+	FileBlobId UNIQUEIDENTIFIER 
+		CONSTRAINT FK_News_FileBlobs NULL FOREIGN KEY REFERENCES Blobs(BlobId),
+
+    IsDownloadable BIT NOT NULL DEFAULT 0,
+	IsInternal BIT NOT NULL DEFAULT 0,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_News_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+    CreatedBy VARCHAR(255) NOT NULL
+		CONSTRAINT DF_News_CreatedBy DEFAULT 'SYSTEM',
+    UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_News_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_News_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+	TotalView INT DEFAULT 0
+)
+
+
+--Approval
+CREATE TABLE ApprovalMappings(
+	ApprovalMappingid INT NOT NULL
+		CONSTRAINT PK_ApprovalMappings PRIMARY KEY IDENTITY,
+	PageId VARCHAR(8) NOT NULL
+		CONSTRAINT FK_ApprovalMappings_Pages FOREIGN KEY REFERENCES Pages(PageId),
+	PositionId INT NOT NULL
+		CONSTRAINT FK_ApprovalMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId),
+	ApprovalLevel INT NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_ApprovalMappings_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_ApprovalMappings_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt datetime2(7) NOT NULL
+		CONSTRAINT DF_ApprovalMappings_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_ApprovalMappings_UpdatedBy DEFAULT 'SYSTEM'
+	
+)
+GO
+
+CREATE TABLE Approvals(
+	ApprovalId INT NOT NULL
+		CONSTRAINT PK_Approvals PRIMARY KEY IDENTITY,
+	ContentName VARCHAR(1024) NOT NULL,
+	ContentCategory VARCHAR(255) NOT NULL,
+	ApprovalMappingId INT NULL
+		CONSTRAINT FK_Approvals_ApprovalMappings FOREIGN KEY REFERENCES ApprovalMappings(ApprovalMappingId),
+	ApprovalLevel INT NOT NULL,
+	ApprovalStatusId INT NOT NULL 
+		CONSTRAINT FK_Approvals_ApprovalStatus FOREIGN KEY REFERENCES ApprovalStatus(ApprovalStatusId),  
+	ActionBy varchar(32) NULL,
+	ActionAt datetime2(7) NULL
+		DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy varchar(32) NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+		DEFAULT CURRENT_TIMESTAMP
+)
+GO
+
+
+CREATE TABLE ApprovalHistories(
+	ApprovalHistoryId INT NOT NULL
+		CONSTRAINT PK_ApprovalHistories PRIMARY KEY IDENTITY,
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalHistories_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	ApprovalStatusId INT NOT NULL 
+		CONSTRAINT FK_ApprovalHistories_ApprovalStatus FOREIGN KEY REFERENCES ApprovalStatus(ApprovalStatusId), 
+	ApprovalStatus VARCHAR(255) NOT NULL, 
+	ActionBy varchar(32) NOT NULL,
+	ActionAt datetime2(7) NOT NULL
+		DEFAULT CURRENT_TIMESTAMP,
+)
+GO
+
+-- ApprovalToContentMapping
+
+CREATE TABLE ApprovalToEvents(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToEvents_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	EventId INT 
+		CONSTRAINT FK_ApprovalToEvents_Events FOREIGN KEY REFERENCES [Events](EventId) NOT NULL,
+	CONSTRAINT PK_ApprovalToEvents PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToBanners(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToBanners_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	BannerId INT 
+		CONSTRAINT FK_ApprovalToBanners_Banners FOREIGN KEY REFERENCES Banners(BannerId) NOT NULL,
+	CONSTRAINT PK_ApprovalToBanners PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToCourses(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToCourses_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	CourseId INT 
+		CONSTRAINT FK_ApprovalToCourses_Courses FOREIGN KEY REFERENCES Courses(CourseId) NOT NULL,
+	CONSTRAINT PK_ApprovalToCourses PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToSetupCourses(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToSetupCourses_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	CourseId INT 
+		CONSTRAINT FK_ApprovalToSetupCourses_Courses FOREIGN KEY REFERENCES Courses(CourseId) NOT NULL,
+	CONSTRAINT PK_ApprovalToSetupCourses PRIMARY KEY(ApprovalId)
+)
+GO
+
+
+CREATE TABLE ApprovalToModules(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToModules_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	ModuleId INT 
+		CONSTRAINT FK_ApprovalToModules_Modules FOREIGN KEY REFERENCES Modules(ModuleId) NOT NULL,
+	CONSTRAINT PK_ApprovalToModules PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToTasks(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToTasks_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	TaskId INT 
+		CONSTRAINT FK_ApprovalToTasks_Tasks FOREIGN KEY REFERENCES Tasks(TaskId) NOT NULL,
+	CONSTRAINT PK_ApprovalToTasks PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToSetupModules(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToSetupModules_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	SetupModuleId INT 
+		CONSTRAINT FK_ApprovalToSetupModules_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId) NOT NULL,
+	CONSTRAINT PK_ApprovalToSetupModules PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToPopQuizzes(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToSetupTasks_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	PopQuizId INT 
+		CONSTRAINT FK_ApprovalToPopQuizzes_PopQuizzes FOREIGN KEY REFERENCES PopQuizzes(PopQuizId) NOT NULL,
+	CONSTRAINT PK_ApprovalToPopQuizzes PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToTrainings(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToTrainings_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	TrainingId INT 
+		CONSTRAINT FK_ApprovalToTrainings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId) NOT NULL,
+	CONSTRAINT PK_ApprovalToTrainings PRIMARY KEY(ApprovalId)
+)
+GO
+
+
+CREATE TABLE ApprovalToGuides(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToGuides_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	GuideId INT 
+		CONSTRAINT FK_ApprovalToGuides_Guides FOREIGN KEY REFERENCES Guides(GuideId) NOT NULL,
+	CONSTRAINT PK_ApprovalToGuides PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalToNews(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToNews_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	NewsId INT 
+		CONSTRAINT FK_ApprovalToNews_News FOREIGN KEY REFERENCES News(NewsId) NOT NULL,
+	CONSTRAINT PK_ApprovalToNews PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE ApprovalPositionMappings 
+(
+	PositionId INT NOT NULL 
+		CONSTRAINT FK_ApprovalPositionMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId),
+
+	ApprovalLevel INT NOT NULL,
+
+	[Description] VARCHAR(1024) NOT NULL,
+
+	CONSTRAINT PK_ApprovalPositionMappings PRIMARY KEY(PositionId)
+)
+GO
+
+
+-- Hobby 
+CREATE TABLE Hobbies (
+	HobbyId INT NOT NULL
+		CONSTRAINT PK_Hobbies PRIMARY KEY IDENTITY,
+	[Name] VARCHAR(255) NOT NULL,
+	[Description] VARCHAR(1024) NULL,
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Hobbies_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Hobbies_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Hobbies_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_Hobbies_UpdatedBy DEFAULT 'SYSTEM'
+)
+GO
+
+CREATE TABLE EmployeeHobbyMappings (
+	
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeeHobbyMappings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	HobbyId INT NOT NULL
+		CONSTRAINT FK_EmployeeHobbyMappings_Hobbies FOREIGN KEY REFERENCES Hobbies(HobbyId),
+
+	CONSTRAINT PK_EmployeeHobbyMappings PRIMARY KEY(EmployeeId, HobbyId)
+)
+GO
+
+--Interest
+CREATE TABLE EmployeeInterests (
+	
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeeInterests_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	TopicId INT NOT NULL
+		CONSTRAINT FK_EmployeeInterests_Topics FOREIGN KEY REFERENCES Topics(TopicId),
+
+	CONSTRAINT PK_EmployeeInterests PRIMARY KEY(EmployeeId, TopicId)
+)
+GO
+
+--Certificate
+CREATE TABLE EmployeeCertificates(
+	EmployeeCertificateId INT NOT NULL PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeeCertificates_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+	[Type] VARCHAR(255) NOT NULL,
+	[Title] VARCHAR(255) NOT NULL,
+	TrainingName VARCHAR(255) NOT NULL,
+	EventDate DATETIME2(7) NOT NULL,
+	Host VARCHAR(255) NOT NULL,
+	Venue VARCHAR(255) NOT NULL,
+	BlobId UNIQUEIDENTIFIER 
+		CONSTRAINT FK_EmployeeCertificates_Blobs FOREIGN KEY REFERENCES Blobs(BlobId)
+)
+GO
+
+CREATE TABLE Assessments 
+(
+	AssessmentId INT 
+		CONSTRAINT PK_Assessments PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_Assessments_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	BlobId UNIQUEIDENTIFIER NOT NULL 
+		CONSTRAINT FK_Assessments_Blobs FOREIGN KEY REFERENCES Blobs(BlobId),
+
+	[Name] VARCHAR(255) NOT NULL,
+	Publisher VARCHAR(255) NOT NULL,
+	[Description] VARCHAR(1024) NULL,
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Assessments_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Assessments_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Assessments_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL
+        CONSTRAINT DF_Assessments_UpdatedBy DEFAULT 'SYSTEM',
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+GO
+
+-- ANSWER
+
+CREATE TABLE TaskAnswers 
+(
+	TaskAnswerId INT 
+		CONSTRAINT PK_TaskAnswers PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_TaskAnswers_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	TrainingId INT NULL 
+		CONSTRAINT FK_TaskAnswers_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+
+	SetupModuleId INT NULL 
+		CONSTRAINT FK_TaskAnswers_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId),
+
+    PopQuizId INT NULL 
+		CONSTRAINT FK_TaskAnswers_PopQuizzes FOREIGN KEY REFERENCES PopQuizzes(PopQuizId),
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+)
+
+GO
+
+CREATE TABLE TaskAnswerDetails 
+(
+	TaskAnswerDetailId INT 
+		CONSTRAINT PK_TaskAnswerDetails PRIMARY KEY IDENTITY,
+
+	TaskAnswerId INT NOT NULL 
+		CONSTRAINT FK_TaskAnswerDetails_TaskAnswers FOREIGN KEY REFERENCES TaskAnswers(TaskAnswerId),
+
+	TaskId INT NOT NULL 
+		CONSTRAINT FK_TaskAnswerDetails_Tasks FOREIGN KEY REFERENCES Tasks(TaskId),
+
+	Answer VARCHAR(1024) NULL,
+	
+	AnswerBlobId UNIQUEIDENTIFIER NULL
+		CONSTRAINT FK_TaskAnswerDetails_Blobs FOREIGN KEY REFERENCES Blobs(BlobId),
+
+	Score INT,
+	Point INT,
+	isTrue BIT NOT NULL DEFAULT 0,
+	isChecked BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+CREATE TABLE TaskSpecialAnswers 
+(
+	TaskSpecialAnswerId INT 
+		CONSTRAINT PK_TaskSpecialAnswers PRIMARY KEY IDENTITY,
+
+	TaskAnswerDetailId INT NULL 
+		CONSTRAINT FK_TaskSpecialAnswers_TaskAnswerDetails FOREIGN KEY REFERENCES TaskAnswerDetails(TaskAnswerDetailId),
+
+	Number INT,
+	Answer VARCHAR(1024) NULL,
+	Score INT,
+	Point INT,
+	isTrue BIT NULL
+)
+GO
+
+
+
+-- EMPLOYEE BADGE
+
+CREATE TABLE EmployeeBadges
+(
+	EmployeeTopicMappingId INT 
+		CONSTRAINT PK_EmployeeBadges PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeeBadges_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	TopicId INT 
+		CONSTRAINT FK_EmployeeBadges_Topics FOREIGN KEY REFERENCES Topics(TopicId),
+
+	EBadgeId INT 
+		CONSTRAINT FK_EmployeeBadges_EBadges FOREIGN KEY REFERENCES EBadges(EBadgeId),
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+
+-- Event Mappings
+CREATE TABLE EventOutletMappings 
+(
+    EventId INT NOT NULL 
+		CONSTRAINT FK_EventOutletMappings_Events FOREIGN KEY REFERENCES [Events](EventId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+    OutletId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EventOutletMappings_Outlets FOREIGN KEY REFERENCES Outlets(OutletId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CONSTRAINT PK_EventOutletMappings PRIMARY KEY(EventId, OutletId)
+)
+
+GO
+
+CREATE TABLE EventPositionMappings 
+(
+    EventId INT NOT NULL 
+		CONSTRAINT FK_EventPositionMappings_Events FOREIGN KEY REFERENCES [Events](EventId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+    PositionId INT NOT NULL 
+		CONSTRAINT FK_EventPositionMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId) 
+			ON UPDATE CASCADE ON DELETE CASCADE,
+
+	CONSTRAINT PK_EventPositionMappings PRIMARY KEY(EventId, PositionId)
+)
+
+-- Employee Level
+
+CREATE TABLE EmployeeLevels(
+	EmployeeLevelId INT 
+		CONSTRAINT PK_EmployeeLevels PRIMARY KEY,
+	MinValue INT
+)
+
+
+CREATE TABLE AssignedLearnings
+(
+	AssignedLearningId INT 
+		CONSTRAINT PK_AssignedLearnings PRIMARY KEY IDENTITY,
+
+	TrainingId INT NULL 
+		CONSTRAINT FK_AssignedLearnings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+
+	SetupModuleId INT NULL 
+		CONSTRAINT FK_AssignedLearnings_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId),
+
+	AssignedTo VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_AssignedLearnings_AssignedTo FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	AssignedBy VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_AssignedLearnings_AssignedBy FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	AssignedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+
+CREATE TABLE LearningHistories
+(
+	LearningHistoryId INT 
+		CONSTRAINT PK_LearningHistories PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_LearningHistories_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	TrainingId INT NULL 
+		CONSTRAINT FK_LearningHistories_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+	
+	SetupModuleId INT NULL 
+		CONSTRAINT FK_LearningHistories_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId),
+
+	PopQuizId INT NULL 
+		CONSTRAINT FK_LearningHistories_PopQuizzes FOREIGN KEY REFERENCES PopQuizzes(PopQuizId),
+
+	[Name] VARCHAR(64) NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+)
+
+
+
+-- Enum table for storing email templates (HTML).
+CREATE TABLE EmailTemplates
+(
+	EmailTemplateId INT
+		CONSTRAINT PK_EmailTemplates PRIMARY KEY,
+
+	Title VARCHAR(255) NOT NULL,
+
+	-- Be wary, do not attempt a JS or anything that might trigger XSS attack.
+	Template VARCHAR(MAX) NOT NULL
+)
+
+-- Inbox
+CREATE TABLE Inboxes
+(
+	InboxId INT
+		CONSTRAINT PK_Inboxes PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_Inboxes_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	[Title] VARCHAR(255) NOT NULL,
+	[Message] VARCHAR(255) NOT NULL,
+	LinkToPage VARCHAR(MAX) NULL,
+	ApprovalId INT NULL
+		CONSTRAINT FK_Inboxes_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_Inboxes_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Inboxes_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL
+		CONSTRAINT DF_Inboxes_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy varchar(64) NOT NULL
+		CONSTRAINT DF_Inboxes_UpdatedBy DEFAULT 'SYSTEM',
+	IsRead BIT NOT NULL DEFAULT 0,
+	IsDone BIT NOT NULL DEFAULT 0
+)
+
+--Position Competency Mappings 
+CREATE TABLE PositionCompentencyMappings(
+	PositionCompentencyMappingId INT 
+		CONSTRAINT PK_PositionCompentencyMappings PRIMARY KEY IDENTITY,
+
+	PositionId INT NOT NULL 
+		CONSTRAINT FK_PositionCompentencyMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId),
+	
+	CompetencyId INT NOT NULL 
+		CONSTRAINT FK_PositionCompentencyMappings_Competencies FOREIGN KEY REFERENCES Competencies(CompetencyId),
+
+	[Priority] VARCHAR(64) NOT NULL,
+
+	ProficiencyLevel INT NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_PositionCompentencyMappings_CreatedAt DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_PositionCompentencyMappings_CreatedBy DEFAULT 'SYSTEM',
+	UpdatedAt DATETIME2(7) NOT NULL 
+		CONSTRAINT DF_PositionCompentencyMappings_UpdatedAt DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL 
+        CONSTRAINT DF_PositionCompentencyMappings_UpdatedBy DEFAULT 'SYSTEM',
+)
+
+CREATE TABLE Surveys
+(
+    SurveyId INT
+		CONSTRAINT PK_Surveys PRIMARY KEY IDENTITY,
+
+	Title VARCHAR(255) NOT NULL,
+	StartDate DATETIME2(7) NULL,
+    EndDate DATETIME2(7) NULL,
+
+    CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CreatedBy VARCHAR(255) NOT NULL
+		CONSTRAINT DF_Surveys_CreatedBy DEFAULT 'SYSTEM',
+    UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UpdatedBy VARCHAR(64) NOT NULL
+		CONSTRAINT DF_Surveys_UpdatedBy DEFAULT 'SYSTEM',
+	ApprovedAt DATETIME2(7) NULL,
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+CREATE TABLE SurveyPositionMappings 
+(
+    SurveyId INT NOT NULL 
+		CONSTRAINT FK_SurveyPositionMappings_Surveys FOREIGN KEY REFERENCES Surveys(SurveyId),
+    PositionId INT NOT NULL 
+		CONSTRAINT FK_SurveyPositionMappings_Positions FOREIGN KEY REFERENCES Positions(PositionId),
+
+	CONSTRAINT PK_SurveyPositionMappings PRIMARY KEY(SurveyId, PositionId)
+)
+
+GO
+
+CREATE TABLE SurveyOutletMappings 
+(
+    SurveyId INT NOT NULL 
+		CONSTRAINT FK_SurveyOutletMappings_Surveys FOREIGN KEY REFERENCES Surveys(SurveyId),
+    OutletId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_SurveyOutletMappings_Outlets FOREIGN KEY REFERENCES Outlets(OutletId),
+	CONSTRAINT PK_SurveyOutletMappings PRIMARY KEY(SurveyId, OutletId)
+)
+
+GO
+
+CREATE TABLE SurveyQuestionTypes
+(
+    SurveyQuestionTypeId INT
+		CONSTRAINT PK_SurveyQuestionTypes PRIMARY KEY IDENTITY,
+
+	[Name] VARCHAR(255) NOT NULL
+)
+GO
+
+CREATE TABLE SurveyQuestions
+(
+	SurveyQuestionId INT 
+		CONSTRAINT PK_SurveyQuestions PRIMARY KEY IDENTITY,
+
+	SurveyId INT NOT NULL 
+		CONSTRAINT FK_SurveyQuestions_Surveys FOREIGN KEY REFERENCES Surveys(SurveyId),
+	
+	SurveyQuestionTypeId INT NOT NULL 
+		CONSTRAINT FK_SurveyQuestions_SurveyQuestionTypes FOREIGN KEY REFERENCES SurveyQuestionTypes(SurveyQuestionTypeId),
+
+	QuestionNumber INT NOT NULL,
+
+	Question VARCHAR(512) NULL,
+
+	BlobId UNIQUEIDENTIFIER NULL
+		CONSTRAINT FK_SurveyQuestions_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+)
+
+CREATE TABLE SurveyChoices
+(
+	SurveyChoiceId INT 
+		CONSTRAINT PK_SurveyChoices PRIMARY KEY IDENTITY,
+
+	SurveyQuestionId INT NOT NULL 
+		CONSTRAINT FK_SurveyChoices_SurveyQuestions FOREIGN KEY REFERENCES SurveyQuestions(SurveyQuestionId),
+
+	Choice VARCHAR(512) NULL,
+
+	BlobId UNIQUEIDENTIFIER NULL
+		CONSTRAINT FK_SurveyChoices_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+)
+
+--Survey Answer
+CREATE TABLE SurveyAnswers 
+(
+	SurveyAnswerId INT 
+		CONSTRAINT PK_SurveyAnswers PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_SurveyAnswers_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	SurveyId INT NOT NULL 
+		CONSTRAINT FK_SurveyAnswers_Surveys FOREIGN KEY REFERENCES Surveys(SurveyId),
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+)
+
+GO
+
+CREATE TABLE SurveyAnswerDetails 
+(
+	SurveyAnswerDetailId INT 
+		CONSTRAINT PK_SurveyAnswerDetails PRIMARY KEY IDENTITY,
+
+	SurveyAnswerId INT NOT NULL 
+		CONSTRAINT FK_SurveyAnswerDetails_SurveyAnswers FOREIGN KEY REFERENCES SurveyAnswers(SurveyAnswerId),
+
+	SurveyQuestionId INT NOT NULL 
+		CONSTRAINT FK_SurveyAnswerDetails_SurveyQuestions FOREIGN KEY REFERENCES SurveyQuestions(SurveyQuestionId),
+
+	Answer VARCHAR(255) NULL,
+
+	BlobId UNIQUEIDENTIFIER NULL
+		CONSTRAINT FK_SurveyAnswerDetails_Blobs FOREIGN KEY REFERENCES Blobs(BlobId) 
+)
+
+GO
+
+CREATE TABLE SurveySpecialAnswers 
+(
+	SurveySpecialAnswerId INT 
+		CONSTRAINT PK_SurveySpecialAnswers PRIMARY KEY IDENTITY,
+
+	SurveyAnswerDetailId INT NULL 
+		CONSTRAINT FK_SurveySpecialAnswers_SurveyAnswerDetails FOREIGN KEY REFERENCES SurveyAnswerDetails(SurveyAnswerDetailId),
+
+	Number INT,
+	Answer VARCHAR(1024) NULL
+)
+GO
+
+
+CREATE TABLE ApprovalToSurveys(
+	ApprovalId INT NOT NULL
+		CONSTRAINT FK_ApprovalToSurveys_Approvals FOREIGN KEY REFERENCES Approvals(ApprovalId),
+	SurveyId INT 
+		CONSTRAINT FK_ApprovalToSurveys_Surveys FOREIGN KEY REFERENCES Surveys(SurveyId) NOT NULL,
+	CONSTRAINT PK_ApprovalToSurveys PRIMARY KEY(ApprovalId)
+)
+GO
+
+CREATE TABLE EmployeeAccessTimes
+(
+	EmployeeAccessTimeId INT 
+		CONSTRAINT PK_EmployeeAccessTimes PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeeAccessTimes_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+	StartTime DATETIME2(7) NULL,
+	EndTime DATETIME2(7) NULL
+)
+
+GO
+
+--MOBILE INBOX
+
+CREATE TABLE RotateTeamMembers
+(
+	RotateTeamMemberId INT
+		CONSTRAINT PK_RotateTeamMembers PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_RotateTeamMembers_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+	PreviousTeamId INT NOT NULL
+		CONSTRAINT FK_RotateTeamMembers_PrevTeams FOREIGN KEY REFERENCES Teams(TeamId),
+	NextTeamId INT NOT NULL
+		CONSTRAINT FK_RotateTeamMembers_NextTeams FOREIGN KEY REFERENCES Teams(TeamId),
+	ApprovalStatusId INT NOT NULL 
+		CONSTRAINT FK_RotateTeamMembers_ApprovalStatus FOREIGN KEY REFERENCES ApprovalStatus(ApprovalStatusId), 
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL		
+)
+
+CREATE TABLE TeamMemberRequests
+(
+	TeamMemberRequestId INT
+		CONSTRAINT PK_TeamMemberRequests PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_TeamMemberRequests_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+	TeamId INT NOT NULL
+		CONSTRAINT FK_TeamMemberRequests_Teams FOREIGN KEY REFERENCES Teams(TeamId),
+	ApprovalStatusId INT NOT NULL 
+		CONSTRAINT FK_TeamMemberRequests_ApprovalStatus FOREIGN KEY REFERENCES ApprovalStatus(ApprovalStatusId), 
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL		
+)
+
+
+CREATE TABLE MobileInboxTypes
+(
+	MobileInboxTypeId INT
+		CONSTRAINT PK_MobileInboxTypes PRIMARY KEY,
+	[Name] VARCHAR(64)
+)
+
+
+CREATE TABLE MobileInboxes
+(
+	MobileInboxId INT
+		CONSTRAINT PK_MobileInboxes PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_MobileInboxes_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	MobileInboxTypeId INT NOT NULL 
+		CONSTRAINT FK_MobileInboxes_MobileInboxTypes FOREIGN KEY REFERENCES MobileInboxTypes(MobileInboxTypeId),
+	[Title] VARCHAR(255) NOT NULL,
+	[Message] VARCHAR(255) NULL,
+	Notes VARCHAR(255) NULL,
+
+	ResignEmployeeId VARCHAR(64) NULL 
+		CONSTRAINT FK_MobileInboxes_ResignEmployees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	RotateTeamMemberId INT  NULL
+		CONSTRAINT FK_MobileInboxes_RotateTeams FOREIGN KEY REFERENCES RotateTeamMembers(RotateTeamMemberId),
+
+		
+	TeamMemberRequestId INT  NULL
+		CONSTRAINT FK_MobileInboxes_TeamMemberRequests FOREIGN KEY REFERENCES TeamMemberRequests(TeamMemberRequestId),
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL,
+	IsRead BIT NOT NULL DEFAULT 0
+)
+
+--Coach Rating
+CREATE TABLE CoachRatings 
+(
+	CoachRatingId INT 
+		CONSTRAINT PK_CoachRatings PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_CoachRatings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	TrainingId INT NOT NULL 
+		CONSTRAINT FK_CoachRatings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+
+	CoachId INT NOT NULL 
+		CONSTRAINT FK_CoachRatings_Coaches FOREIGN KEY REFERENCES Coaches(CoachId),
+
+	RatingScore INT NOT NULL,
+
+	Review VARCHAR(512),
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CreatedBy VARCHAR(64) NOT NULL,
+	UpdatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	IsDeleted BIT NOT NULL DEFAULT 0
+)
+
+GO
+
+--Enroll learning
+
+CREATE TABLE EnrollLearnings(
+	EnrollLearningId INT
+		CONSTRAINT PK_EnrollLearningId PRIMARY KEY IDENTITY,
+	EmployeeId VARCHAR(64)
+		CONSTRAINT FK_EnrollLearnings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+	TrainingId INT
+		CONSTRAINT FK_EnrollLearnings_Trainings FOREIGN KEY REFERENCES Trainings(TrainingId),
+	IsQueued BIT NOT NULL DEFAULT 0,
+	IsEnrolled BIT NOT NULL DEFAULT 0,
+	RemedialLevel  INT NOT NULL DEFAULT 0,
+	IsPassed  BIT NOT NULL DEFAULT 0,
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+
+GO
+
+--Enroll learning time
+
+CREATE TABLE EnrollLearningTimes(
+	EnrollLearningTimeId INT
+		CONSTRAINT PK_EnrollLearningTimes PRIMARY KEY IDENTITY,
+	EnrollLearningId INT
+		CONSTRAINT FK_EnrollLearningTimes_EnrollLearnings FOREIGN KEY REFERENCES EnrollLearnings(EnrollLearningId),
+	SetupModuleId INT NOT NULL
+		CONSTRAINT FK_EnrollLearningTimes_SetupModules FOREIGN KEY REFERENCES SetupModules(SetupModuleId),
+	StartTime DATETIME2(7) NULL,
+	EndTime DATETIME2(7) NULL
+)
+
+GO
+
+
+CREATE TABLE EmployeeEventMappings (
+	
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeeEventMappings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	EventId INT NOT NULL
+		CONSTRAINT FK_EmployeeEventMappings_Events FOREIGN KEY REFERENCES [Events](EventId),
+
+	CONSTRAINT PK_EmployeeEventMappings PRIMARY KEY(EmployeeId, EventId),
+
+	IsJoined BIT DEFAULT 0,
+	JoinedAt DATETIME2(7) NULL,
+	IsSaved BIT DEFAULT 0,
+	SavedAt DATETIME2(7) NULL,
+)
+GO
+
+
+CREATE TABLE FileContentTypes(
+	ContentType VARCHAR(255) NOT NULL,
+	MIME VARCHAR (255) NOT NULL
+
+	CONSTRAINT PK_FileContentTypes PRIMARY KEY(ContentType, MIME)
+)
+GO
+
+CREATE TABLE EmployeeRewardMappings(
+	EmployeeId VARCHAR(64) NOT NULL
+		CONSTRAINT FK_EmployeeRewardMappings_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+	RewardId INT NOT NULL
+		CONSTRAINT FK_EmployeeRewardMappings_Rewards FOREIGN KEY REFERENCES Rewards(RewardId),
+	CONSTRAINT PK_EmployeeRewardMappings PRIMARY KEY(EmployeeId, RewardId)
+)
+
+GO
+
+CREATE TABLE PointTransactionTypes 
+(
+	PointTransactionTypeId INT
+		CONSTRAINT PK_PointTransactionTypes PRIMARY KEY,
+
+	[Name] VARCHAR(64) NOT NULL
+)
+
+CREATE TABLE EmployeePointHistories 
+(
+	EmployeePointHistoryId INT
+		CONSTRAINT PK_EmployeePointHistories PRIMARY KEY IDENTITY,
+
+	EmployeeId VARCHAR(64) NOT NULL 
+		CONSTRAINT FK_EmployeePointHistories_Employees FOREIGN KEY REFERENCES Employees(EmployeeId),
+
+	RewardPointTypeId INT NOT NULL
+		CONSTRAINT FK_EmployeePointHistories_RewardPointTypes FOREIGN KEY REFERENCES RewardPointTypes(RewardPointTypeId),
+
+	PointTransactionTypeId INT NOT NULL
+		CONSTRAINT FK_EmployeePointHistories_PointTransactionTypes FOREIGN KEY REFERENCES PointTransactionTypes(PointTransactionTypeId),
+
+	Point INT NOT NULL,
+
+	CreatedAt DATETIME2(7) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+
+GO

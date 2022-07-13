@@ -1,0 +1,7 @@
+﻿@page
+@model Talent.WebAdmin.Pages.MasterData.NewsModel
+@{
+    ViewData["Title"] = "iTalent - News";
+}
+
+<news type="@Model.Type" :id="@Model.NewsId"></news>

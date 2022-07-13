@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TypeScriptToolsVersion>3.2</TypeScriptToolsVersion>
+    <UserSecretsId>96b329b3-4aad-477b-ba25-ad8169e20b47</UserSecretsId>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Talent' " />
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.95.0" />
+    <PackageReference Include="ClosedXML.Extensions.WebApi" Version="0.2.1" />
+    <PackageReference Include="CorePush" Version="2.0.0" />
+    <PackageReference Include="Dapper" Version="2.0.30" />
+    <PackageReference Include="Handlebars.Net" Version="1.10.1" />
+    <PackageReference Include="jose-jwt" Version="2.5.0" />
+    <PackageReference Include="MailKit" Version="2.3.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.App">
+      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
+      <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.1.0" />
+    <PackageReference Include="Serilog.Exceptions" Version="5.3.1" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.4" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="1.4.0" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <!--<PackageReference Include="NSwag.AspNetCore" Version="12.2.5" />-->
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
+    <PackageReference Include="Minio" Version="3.1.6" />
+    <PackageReference Include="Serilog.Sinks.Slack.Core" Version="0.1.5-beta" />
+    <PackageReference Include="SkiaSharp" Version="1.68.2.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="1.68.2.1" />
+    <!--<PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="4.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUi" Version="4.0.1" />-->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
+    <PackageReference Include="FirebaseAdmin" Version="2.1.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.51.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+
+    <PackageReference Include="AWSSDK.S3" Version="3.3.20" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.3.6" />
+    <PackageReference Include="runtime.osx.10.10-x64.CoreCompat.System.Drawing" Version="5.8.64" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Talent.Entities\Talent.Entities.csproj">
+      <GlobalPropertiesToRemove>;WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\TAM.Talent.Certificate.Lib\TAM.Talent.Certificate.Lib.csproj">
+      <GlobalPropertiesToRemove>;WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\TAM.Talent.Commons.Core\TAM.Talent.Commons.Core.csproj">
+      <GlobalPropertiesToRemove>;WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\TAM.Talent.Excels.Lib\TAM.Talent.Excels.Lib.csproj">
+      <GlobalPropertiesToRemove>;WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
+    <ProjectReference Include="..\TAM.Talent.Jobs.MDM\TAM.Talent.Jobs.MDM.csproj">
+      <GlobalPropertiesToRemove>;WebPublishProfileFile</GlobalPropertiesToRemove>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="client\js\components\Report\SurveyReport.vue" />
+    <TypeScriptCompile Include="client\js\services\FileReportService.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="runtime.osx.10.10-x64.CoreCompat.System.Drawing" />
+    <None Remove="Models\TrackingProgressReport\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\UserLogActivity\" />
+    <Folder Include="Models\TrackingProgressReport\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\UserLogActivity\" />
+  </ItemGroup>
+</Project>

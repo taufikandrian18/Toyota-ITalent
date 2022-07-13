@@ -1,0 +1,7 @@
+@page
+@model Template.Pages.GuideModel
+@{
+    ViewData["Title"] = "iTalent - Guide";
+}
+
+<guide :guide-id="@Model.GuideId" :from-outside="@Model.FromOutside.ToString().ToLower()"></guide>

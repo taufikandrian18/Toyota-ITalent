@@ -1,0 +1,7 @@
+﻿@page "{mode}"
+@model Talent.WebAdmin.Pages.Setup.Tasks.ShortAnswerModel
+@{
+    ViewData["Title"] = "iTalent - Task (ShortAnswer)";
+}
+
+<short-answer mode="@Model.Mode" :taskid="@Model.TaskId" :from-outside="@Model.FromOutside.ToString().ToLower()"></short-answer>

@@ -1,0 +1,7 @@
+﻿@page
+@model Template.Pages.EventModel
+@{
+    ViewData["Title"] = "iTalent - Event";
+}
+
+<event :event-id="@Model.EventId" :from-outside="@Model.FromOutside.ToString().ToLower()"></event>

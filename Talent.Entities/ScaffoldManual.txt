@@ -1,0 +1,4 @@
+dotnet ef dbcontext scaffold "Server=94.237.76.37,1435;Database=ITALENT_UAT;Trusted_Connection=False;User ID=italent_dev;Password=iTalentDev" Microsoft.EntityFrameworkCore.SqlServer -o Entities -c "TalentContext" -f -d
+
+dotnet ef dbcontext scaffold "Server=tcp:italent-db.database.windows.net,1433;Initial Catalog=italent;Persist Security Info=False;User ID=admin.italent;Password=ToyotaTalent2020" Microsoft.EntityFrameworkCore.SqlServer -o Entities -c "TalentContext" -f -d
+

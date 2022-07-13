@@ -1,0 +1,103 @@
+﻿@inject Services.IContextualService ContextMan
+@inject Services.AppSettings Settings
+@{
+    //var username = ContextMan.CookieClaims.Name;
+    var ssoLogoutLink = $"{this.Settings.SSOSettings.Uri}/auth/logout";
+    var username = "User";
+    var role = "Role";
+
+    if (ContextMan != null && ContextMan.CookieClaims != null)
+    {
+        username = ContextMan?.CookieClaims?.Username;
+        role = ContextMan?.CookieClaims?.Roles[0];
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/ipack.css" asp-append-version="true" />
+    <link rel="icon" href="~/icon_italent.png">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <!-- Function to Hide Sidebar -->
+    <script>
+        function sidebarHandler() {
+            side = document.getElementById("sidenav").style.display;
+            content = document.getElementById("content");
+            if (side === "none") {
+                document.getElementById("sidenav").style.display = "flex";
+                content.classList.remove("col-md-12");
+                content.classList.add("col-md-10");
+            } else {
+                document.getElementById("sidenav").style.display = "none";
+                content.classList.remove("col-md-10");
+                content.classList.add("col-md-12");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="layout row mx-0">
+        <!-- Navbar -->
+        <div class="col-12 px-0 py-2 talent_navbar talent_bg_white talent_bg_shadow">
+            <div class="row mx-0 h-100 d-flex align-items-center">
+                <!-- ITalent Logo -->
+                <div class="col-auto col-md-2 d-flex justify-content-center align-items-center">
+                    <a href="/Index"><img src="~/logo_italent.png" width="100" /></a>
+                </div>
+                <!-- Hamburger Icon -->
+                <div class="col-md d-none d-md-flex hamburger-icon">
+                    <button type="button" onclick="sidebarHandler()">
+                        <span class="text-white">
+                            <i class="fa fa-bars rounded-circle talent_bg_darkblue" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <!-- Logout -->
+                <div class="col col-md-auto d-flex justify-content-end align-items-center">
+                    <div class="tooltips">
+                        <span class="mr-3 talent_font_darkblue" data-toggle="modal" data-target="#modalTutorials">
+                            <i class="fa fa-info-circle fa-lg" aria-hidden="true"></i>
+                        </span>
+                        <span class="tooltiptext">23 April 2021 (published :1)</span>
+                        @* <modal-tutorials :name="modalTutorials"></modal-tutorials> *@
+                    </div>
+                    <h5 class="mb-0 d-none d-md-block">
+                        <b>Hello</b>, @username
+                    </h5>
+                    <span id="logout">
+                        <sso-logout logout-url="@ssoLogoutLink"></sso-logout>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Sidebar -->
+        <div id="sidenav" class="col-md-2 col-auto sidebar px-0">
+            <div id="sidebar" class="w-100 d-none d-md-block talent_font_white">
+                <talentnavbar role="@role"></talentnavbar>
+            </div>
+        </div>
+        <!-- Content -->
+        <div id="content" class="col-md-10 col-12 px-0">
+            <main role="main" id="app" class="p-4">
+                @RenderBody()
+            </main>
+        </div>
+
+        <div id="modaltutorial">
+            <modaltutorials></modaltutorials>
+        </div>
+    </div>
+
+    <script src="~/js/ipack.dll.js"></script>
+    <script src="~/js/ipack.js"></script>
+
+</body>
+
+</html>

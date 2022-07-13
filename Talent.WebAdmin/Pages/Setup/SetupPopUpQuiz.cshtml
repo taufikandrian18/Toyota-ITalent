@@ -1,0 +1,8 @@
+﻿@page "{mode}"
+@model Talent.WebAdmin.Pages.Setup.SetupLearning.SetupPopUpQuizModel
+@{
+    ViewData["Title"] = "iTalent - Setup Pop Quiz";
+
+}
+
+<setup-pop-quiz mode="@Model.Mode" pop-quiz-id="@Model.PopQuizId" :from-outside="@Model.FromOutside.ToString().ToLower()"></setup-pop-quiz>

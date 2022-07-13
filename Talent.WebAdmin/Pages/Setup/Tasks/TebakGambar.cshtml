@@ -1,0 +1,8 @@
+﻿@page "{mode}"
+@model Talent.WebAdmin.Pages.Tasks.TebakGambarModel
+@{
+    ViewData["Title"] = "iTalent - Task (Tebak Gambar)";
+}
+
+<tebak-gambar mode="@Model.Mode" task-id="@Model.TaskId" :from-outside="@Model.FromOutside.ToString().ToLower()"></tebak-gambar>
+@*<tebak-gambar mode="add"></tebak-gambar>*@
